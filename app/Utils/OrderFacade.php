@@ -2,15 +2,16 @@
 
 namespace App\Utils;
 
+use App\Models\Order;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @method static toTWD($value, \App\Enums\Currency $currency)
+ * @method static createOrder(array $data): Order
  */
-class Currency extends Facade
+class OrderFacade extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return 'currency.facade';
+        return 'order.facade';
     }
 }

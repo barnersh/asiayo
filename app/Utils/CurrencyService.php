@@ -4,7 +4,7 @@ namespace App\Utils;
 
 use App\Enums\Currency;
 
-class CurrencyUtil
+class CurrencyService
 {
     const int TWD_USD_EXCHANGE_RATE = 31;
     public function toTWD($value, \App\Enums\Currency $currency)

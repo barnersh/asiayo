@@ -28,7 +28,11 @@ class OrderPostRequest extends FormRequest
         return [
             'name' => ['required', new AlphaWithSpaceRule(), new NameCapitalizeRule()],
             'price' => ['required', 'numeric', 'max:2000'],
-            'currency' => ['required', new Enum(Currency::class)]
+            'currency' => ['required', new Enum(Currency::class)],
+            'room_id' => ['required', 'integer'],
+            'bnb_id' => ['required', 'integer'],
+            'check_in_date' => ['required', 'date'],
+            'check_out_date' => ['required', 'date'],
         ];
     }
 
@@ -36,7 +40,7 @@ class OrderPostRequest extends FormRequest
     {
         return [
             'price.max' => 'Price is over 2000',
-            'currency' => 'Currency format is wrong',
+            'currency' => 'CurrencyFacade format is wrong',
         ];
     }
 }

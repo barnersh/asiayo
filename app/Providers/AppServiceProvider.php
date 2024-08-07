@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use App\Utils\CurrencyUtil;
+use App\Utils\CurrencyService;
+use App\Utils\OrderService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,7 +22,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->bind('currency.facade', function () {
-            return new CurrencyUtil();
+            return new CurrencyService();
+        });
+
+        $this->app->bind('order.facade', function () {
+            return new OrderService();
         });
     }
 }
