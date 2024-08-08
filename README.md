@@ -1,66 +1,71 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+### SQL Test
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+1. 請寫出一條查詢語句 (SQL)，列出在 2023 年 5 月下訂的訂單，使用台幣付款且5月總金額最 多的前 10 筆的旅宿 ID (bnb_id), 旅宿名稱 (bnb_name), 5 月總金額 (may_amount)
+```mysql
+SELECT
+    bnbs.id AS bnb_id,
+    bnbs.name AS bnb_name,
+    SUM(orders.amount) AS total_amount
+FROM
+    orders
+        JOIN
+    bnbs ON orders.bnb_id = bnbs.id
+WHERE
+    orders.currency = 'TWD'
+  AND orders.check_in_date BETWEEN '2024-08-01' AND '2024-08-31'
+GROUP BY
+    bnbs.id, bnbs.name
+ORDER BY
+    total_amount DESC
+LIMIT 10;
+```
 
-## About Laravel
+2. 在題目一的執行下，我們發現 SQL 執行速度很慢，您會怎麼去優化?請闡述您怎麼判斷與優 化的方式
+- Index
+  - orders table
+    - 新增 (check_in_date, currency) 複合索引
+    - 新增 (bnb_id, bnb_name) 複合索引
+- Query 修改
+  - where 順序修改為
+```mysql
+WHERE
+    orders.check_in_date BETWEEN '2024-08-01' AND '2024-08-31'
+  AND orders.currency = 'TWD'
+```
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- 思考過程
+  - currency 是屬於選擇性較少的欄位，若要充分利用 index 的效果，應該要將選擇性較多的欄位放在 index 前方
+  - 為了要讓複合 index 有效果，where 順序也需要遵循 index 順序
+- 其他
+  - 以上是僅針對題目思考，建立多個 index 可能有利於讀取，但相對應的需要付出的空間甚至是寫入的效率，皆需要根據真實情況去做評估與取捨
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
+### SOLID 原則和設計模式
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## SOLID 原則
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+1. **單一職責原則 (Single Responsibility Principle)**:
+    - `OrderPostRequest` 僅負責驗證訂單的輸入資料。
+    - `OrderService` 僅負責處理訂單的創建邏輯。
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. **開放封閉原則 (Open/Closed Principle)**:
+    - `OrderService` 通過添加新方法來擴展其功能，而無需修改現有代碼。
 
-## Laravel Sponsors
+3. **里氏替換原則 (Liskov Substitution Principle)**:
+    - `OrderFacade` 作為 `OrderService` 的入口，可以在任何地方使用 `OrderFacade` 替代 `OrderService`，而不影響其他正在使用的地方的正確性。
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+4. **接口隔離原則 (Interface Segregation Principle)**:
+    - `CurrencyService` 和 `OrderService` 各自定義了特定的功能邏輯，控制器只需要使用需要的 Facade 入口。
 
-### Premium Partners
+5. **依賴倒置原則 (Dependency Inversion Principle)**:
+    - `OrderController` 通過 `OrderFacade` 依賴於 Facade，而不是具體的 `OrderService` 實現。
+    - `AppServiceProvider` 通過服務容器將 `OrderService` 注入到應用中，實現了依賴倒置。
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## 設計模式
 
-## Contributing
+1. **Facade 模式**:
+    - 使用 `OrderFacade` 簡化了 `OrderService` 的調用，使得代碼更加簡潔易讀。
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+2. **依賴注入 (Dependency Injection)**:
+    - 通過 ServiceProvider 將 `OrderService` 註冊到服務容器，控制器通過 `OrderFacade` 進行依賴注入，解耦了組件之間的依賴關係。
