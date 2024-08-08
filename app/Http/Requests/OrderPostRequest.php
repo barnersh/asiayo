@@ -40,7 +40,7 @@ class OrderPostRequest extends FormRequest
     {
         return [
             'price.max' => 'Price is over 2000',
-            'currency' => 'CurrencyFacade format is wrong',
+            'currency' => 'Currency format is wrong',
         ];
     }
 }
